@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: khataflow-api
+    runtime: docker
+    dockerContext: ./server
+    dockerfilePath: ./server/Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+  - type: web
+    name: khataflow-web
+    runtime: docker
+    dockerContext: ./client
+    dockerfilePath: ./client/Dockerfile

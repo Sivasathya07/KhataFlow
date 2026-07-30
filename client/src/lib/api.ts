@@ -1,0 +1,59 @@
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
+
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1",
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("khataflow_access_token");
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+let refreshPromise: Promise<string | null> | null = null;
+
+async function refreshAccessToken(): Promise<string | null> {
+  const refreshToken = localStorage.getItem("khataflow_refresh_token");
+  if (!refreshToken) return null;
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_API_URL ?? "http://localhost:8000/api/v1"}/auth/refresh`,
+      { refreshToken },
+    );
+    const { accessToken, refreshToken: nextRefresh } = response.data.data;
+    localStorage.setItem("khataflow_access_token", accessToken);
+    if (nextRefresh) localStorage.setItem("khataflow_refresh_token", nextRefresh);
+    return accessToken as string;
+  } catch {
+    localStorage.removeItem("khataflow_access_token");
+    localStorage.removeItem("khataflow_refresh_token");
+    localStorage.removeItem("khataflow_user");
+    return null;
+  }
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+    if (!original || error.response?.status !== 401 || original._retry) {
+      return Promise.reject(error);
+    }
+    if (original.url?.includes("/auth/login") || original.url?.includes("/auth/refresh")) {
+      return Promise.reject(error);
+    }
+    original._retry = true;
+    refreshPromise = refreshPromise ?? refreshAccessToken().finally(() => {
+      refreshPromise = null;
+    });
+    const accessToken = await refreshPromise;
+    if (!accessToken) {
+      window.dispatchEvent(new Event("khataflow:logout"));
+      return Promise.reject(error);
+    }
+    original.headers.Authorization = `Bearer ${accessToken}`;
+    return api(original);
+  },
+);

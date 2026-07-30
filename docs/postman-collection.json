@@ -1,0 +1,8 @@
+{
+  "info": {"name": "KhataFlow API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
+  "variable": [{"key": "baseUrl", "value": "http://localhost:8000"}],
+  "item": [
+    {"name": "Health", "request": {"method": "GET", "url": "{{baseUrl}}/health"}},
+    {"name": "Register", "request": {"method": "POST", "header": [{"key":"Content-Type","value":"application/json"}], "body": {"mode":"raw", "raw":"{\n  \"businessName\": \"Anita Stores\",\n  \"displayName\": \"Anita\",\n  \"email\": \"anita@example.com\",\n  \"password\": \"secure-password\"\n}"}, "url": "{{baseUrl}}/api/v1/auth/register"}}
+  ]
+}
