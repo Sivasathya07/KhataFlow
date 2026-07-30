@@ -12,8 +12,19 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: LLM_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: ENVIRONMENT
+        value: production
   - type: web
     name: khataflow-web
     runtime: docker
     dockerContext: ./client
     dockerfilePath: ./client/Dockerfile
+    envVars:
+      - key: API_URL
+        sync: false
