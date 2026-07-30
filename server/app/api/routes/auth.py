@@ -149,6 +149,10 @@ def login(payload: LoginRequest) -> dict:
     user = get_database()["users"].find_one({"email": str(payload.email).casefold()})
     if not user or not user.get("isActive") or not bcrypt.checkpw(payload.password.encode(), user.get("passwordHash", "").encode()):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
+    # Auto-verify email on first login if SMTP is not configured
+    if not user.get("isEmailVerified") and not get_settings().smtp_host:
+        get_database()["users"].update_one({"_id": user["_id"]}, {"$set": {"isEmailVerified": True}})
+        user["isEmailVerified"] = True
     return {"data": {"user": _user_view(user), **_tokens(user)}}
 
 
