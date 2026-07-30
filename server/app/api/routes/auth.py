@@ -121,7 +121,7 @@ def register(payload: RegisterRequest) -> dict:
         "profile": {"displayName": payload.display_name},
         "roles": ["owner"],
         "isActive": True,
-        "isEmailVerified": False,
+        "isEmailVerified": not get_settings().smtp_host,
         "createdAt": utc_now(),
         "updatedAt": utc_now(),
     }
