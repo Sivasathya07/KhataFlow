@@ -1,76 +1,131 @@
-# KhataFlow
+# KhataFlow 🧾⚡
 
-KhataFlow is a voice-first retail bookkeeping and inventory platform. It provides a React dashboard, FastAPI service, MongoDB-backed inventory/customer APIs, JWT authentication, and a review-before-confirming local Whisper workflow.
-
-## Repository structure
-
-```text
-KhataFlow/
-├── client/                 # React + Vite + TypeScript application
-│   ├── src/
-│   │   ├── components/     # Shared UI components
-│   │   ├── lib/            # Client utilities
-│   │   └── main.tsx        # Application entry point
-│   ├── components.json     # shadcn/ui configuration
-│   ├── package.json
-│   └── vite.config.ts
-├── server/                 # FastAPI application
-│   ├── app/
-│   │   ├── api/            # HTTP route modules
-│   │   ├── agents/         # AI agent orchestration
-│   │   ├── database/       # Database connections and repositories
-│   │   ├── models/         # MongoDB persistence models
-│   │   ├── prompts/        # Prompt templates
-│   │   ├── schemas/        # API request/response schemas
-│   │   ├── services/       # Application services
-│   │   ├── utils/          # Shared server utilities
-│   │   ├── config.py       # Environment settings
-│   │   └── main.py         # FastAPI application factory
-│   ├── .env.example
-│   └── requirements.txt
-├── docs/                   # Architecture and product documentation
-├── .gitignore
-└── README.md
-```
-
-## Prerequisites
-
-- Node.js 20+
-- Python 3.11+
-- MongoDB Atlas connection string
-
-## How to Run KhataFlow
-
-### Option 1: Quick Start with Docker Compose (Recommended)
-
-Run the entire application (MongoDB + Backend API + Frontend Web App) with a single command:
-
-```bash
-# 1. Clone or open project root directory
-cd KhataFlow
-
-# 2. Start all services using Docker Compose
-docker compose up --build
-```
-
-- **Frontend App**: Open [http://localhost:8080](http://localhost:8080)
-- **Backend API Docs**: Open [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Health Check**: Open [http://localhost:8000/health](http://localhost:8000/health)
+**KhataFlow** is a modern, voice-first retail bookkeeping, POS, and inventory management platform designed for Indian small businesses and retail shopkeepers. It combines a high-performance React dashboard, an agentic FastAPI backend, MongoDB Atlas multi-tenant persistence, local offline voice recognition (Faster-Whisper), Groq AI business insights, and 1-click WhatsApp payment reminders.
 
 ---
 
-### Option 2: Running Frontend & Backend Separately (Development Mode)
+## 🌟 Key Features
 
-#### 1. Backend Server (FastAPI)
+- **🎙️ Voice-First Bookkeeping & AI Chat**: Speak sales or queries in **English, Tamil, or Tanglish** (*"Sell 2 kg rice to Anita"* or *"Stock evvalo iruku?"*). Powered by offline Faster-Whisper and Groq LLaMA 3.3 AI agents.
+- **🛒 Quick Sale POS**: Instant barcode/SKU search, live cart management, automatic GST calculation (CGST/SGST/IGST), and support for Cash, UPI, Card, or Credit (*Udhar*).
+- **📘 Customer Credit Ledger (Khata)**: Track outstanding customer debts, record partial/full payments, and generate PDF payment receipts.
+- **💬 1-Click WhatsApp Payment Reminders**: Send formatted WhatsApp payment reminders pre-filled with dynamic UPI payment links (`wa.me` deep-links).
+- **📦 Inventory & Supplier Management**: Optimistic concurrency control for stock updates, low-stock reorder alerts, supplier tracking, and receiving purchase inventory.
+- **📊 Daily Close & Tax Reports**: Instant daily closing summaries, GST tax collection reports, profit breakdown, and 1-click **PDF & CSV/Excel exports**.
+- **🔒 Multi-Tenant Enterprise Security**: JWT access & refresh token rotation, bcrypt password hashing, tenant isolation by `businessId`, and strict CORS policies.
 
-In terminal 1:
+---
+
+## 🛠️ Complete Tech Stack
+
+| Domain | Technology / Library | Purpose & Description |
+| :--- | :--- | :--- |
+| **Frontend Core** | **React 19** + **TypeScript** | High-performance single page application (SPA) |
+| **Build System** | **Vite 6** | Instant HMR development server and optimized bundle build |
+| **Styling & UI** | **Tailwind CSS v4** + **shadcn/ui** | Modern responsive design system with dark/light themes |
+| **Icons & Typography** | **Lucide React** + **Google Fonts** | Fraunces (Headings) + Source Sans 3 (Body) |
+| **Client HTTP** | **Axios** | Interceptor-driven HTTP client with automatic JWT token refresh |
+| **Speech APIs** | **Web Speech API** + **SpeechSynthesis** | Browser-native speech recognition & TTS voice response |
+| **Backend Framework** | **FastAPI** (Python 3.11+) | Async high-concurrency Python REST API service |
+| **Server Runtime** | **Uvicorn** / **Gunicorn** | ASGI web server for production and development |
+| **Database** | **MongoDB / MongoDB Atlas** | Schema-validated document store with PyMongo driver |
+| **AI LLM Agent** | **Groq API** (`llama-3.3-70b-versatile`) | Natural language understanding, transaction proposal generation & insights |
+| **Voice Processing** | **Faster-Whisper** + **PyDub** + **FFmpeg** | Offline local CTranslate2 Whisper model for audio transcription |
+| **Security & Auth** | **PyJWT** + **Bcrypt** | JWT Access & Refresh session security with token revocation |
+| **PDF & Export** | **ReportLab** + **OpenPyXL** | Automated PDF invoice generation and Excel spreadsheet exports |
+| **Reverse Proxy** | **Nginx** | Client SPA routing, static caching, gzip compression & API reverse proxy |
+| **Containers & Deploy** | **Docker** + **Render** | Dockerized client & server containers with `render.yaml` orchestration |
+
+---
+
+## 📁 Repository Structure
+
+```text
+KhataFlow/
+├── client/                     # React + Vite + TypeScript Frontend Application
+│   ├── src/
+│   │   ├── components/         # Reusable shadcn UI primitives (Button, Card, Input, etc.)
+│   │   ├── features/           # Modular domain features:
+│   │   │   ├── agent/          # AI voice chat & conversational bookkeeping interface
+│   │   │   ├── auth/           # Login, Register, Password Reset & Auth Context
+│   │   │   ├── customers/      # Credit ledger, payment collection & WhatsApp links
+│   │   │   ├── dashboard/      # Business metrics, revenue charts & AI insights
+│   │   │   ├── inventory/      # Stock catalogue, product management & reorder alerts
+│   │   │   ├── pos/            # Point of Sale quick billing & receipt printing
+│   │   │   ├── reports/        # Daily close, GST tax summaries & PDF/CSV exports
+│   │   │   ├── settings/       # Shop configuration, UPI settings & API keys
+│   │   │   ├── suppliers/      # Supplier registry & purchase receiving
+│   │   │   ├── transactions/   # Invoice ledger, returns & itemized history
+│   │   │   └── voice/          # Audio recorder modal & local Whisper integration
+│   │   ├── lib/                # Axios API client & error extractor helpers
+│   │   └── App.tsx             # Route orchestration & primary layout shell
+│   ├── Dockerfile              # Production Nginx container build
+│   ├── nginx.conf              # Production Nginx config (proxying /api/ to backend)
+│   └── package.json
+│
+├── server/                     # FastAPI Python Backend Application
+│   ├── app/
+│   │   ├── agents/             # AI agent planner, executor & natural language parser
+│   │   ├── api/                # REST API route handlers (/auth, /inventory, /pos, etc.)
+│   │   ├── database/           # MongoDB Atlas connection pool & index initializers
+│   │   ├── models/             # PyMongo document models with index metadata
+│   │   ├── schemas/            # Pydantic v2 data validation schemas
+│   │   ├── services/           # Business logic (transactions, voice, reports, WhatsApp)
+│   │   ├── config.py           # Pydantic settings loading from environment
+│   │   └── main.py             # FastAPI entrypoint, CORS & error handling middleware
+│   ├── Dockerfile              # Python Docker container build
+│   └── requirements.txt        # Python package dependencies
+│
+├── docs/                       # Architecture diagrams & API specification docs
+├── render.yaml                 # Multi-service deployment spec for Render
+├── docker-compose.yml          # Local containerized orchestration
+└── README.md
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js**: v20.0 or higher
+- **Python**: v3.11 or higher
+- **MongoDB**: Local MongoDB instance or free MongoDB Atlas URI
+
+---
+
+### Option 1: Quick Start with Docker Compose (Recommended)
+
+Run the complete application (Frontend + Backend API + Nginx Proxy) with one command:
 
 ```bash
-# Navigate to server directory
+# 1. Clone the repository
+git clone https://github.com/Sivasathya07/KhataFlow.git
+cd KhataFlow
+
+# 2. Configure environment variables in server/.env
+cp server/.env.example server/.env
+
+# 3. Build and launch containers
+docker compose up --build
+```
+
+- **Frontend App**: [http://localhost:8080](http://localhost:8080)
+- **Backend API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Health Endpoint**: [http://localhost:8000/health](http://localhost:8000/health)
+
+---
+
+### Option 2: Running Development Servers Separately
+
+#### 1. Backend Service (FastAPI)
+
+```bash
 cd server
 
 # Create and activate Python virtual environment
 python -m venv .venv
+
 # On Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
 # On macOS / Linux:
@@ -79,22 +134,19 @@ python -m venv .venv
 # Install dependencies
 pip install -r requirements.txt
 
-# Create .env file (if not already created)
+# Create .env file
 copy .env.example .env   # Windows
 # cp .env.example .env   # macOS/Linux
 
-# Start FastAPI dev server
+# Start FastAPI development server
 uvicorn app.main:app --reload --port 8000
 ```
 
-The API server will run at `http://localhost:8000`.
+The API will be available at `http://localhost:8000` with interactive docs at `http://localhost:8000/docs`.
 
-#### 2. Frontend Client (React + Vite)
-
-In terminal 2:
+#### 2. Frontend Web App (React + Vite)
 
 ```bash
-# Navigate to client directory
 cd client
 
 # Install packages
@@ -104,134 +156,74 @@ npm install
 npm run dev
 ```
 
-The React web interface will open at `http://localhost:5173`.
+The web application will open at `http://localhost:5173`.
 
 ---
 
-### Verification & Health Check
+## ⚙️ Environment Variables
 
-Verify that the server is running properly:
-
-```bash
-curl http://localhost:8000/health
-```
-
-Expected response:
-
-```json
-{"status":"healthy"}
-```
-
----
-
-### Offline Voice Transcription Setup
-
-Voice transactions run locally through Faster-Whisper. Set `WHISPER_MODEL` to the
-default `base` model already in the Faster-Whisper cache, or to a locally mounted
-CTranslate2 Whisper model directory. The service intentionally uses local files
-only, so it never sends audio or transcripts to an external API and does not make
-runtime model-download requests. FFmpeg must be installed and available on `PATH`
-for browser WebM/OGG recordings.
-
-AAC uploads are also accepted. The confirmed workflow uses a deterministic parser as
-its safe offline fallback when external AI services are unavailable.
-
-## Authentication and core APIs
-
-Register with `POST /api/v1/auth/register`, then use `POST /api/v1/auth/login` and
-`POST /api/v1/auth/refresh` to obtain JWTs. The public product, customer, and voice
-workflow endpoints are grouped under `/api/v1`; interactive OpenAPI documentation is
-available at `/docs`.
-
-The included [Postman collection](docs/postman-collection.json) contains a health and
-registration request. Customer APIs support create, search/pagination, and update;
-inventory supports full product CRUD and optimistic locking.
-
-## Containers
-
-Copy `server/.env.example` to `server/.env`, supply MongoDB URI, a strong
-`JWT_SECRET`, then run:
-
-```bash
-docker compose up --build
-```
-
-The web app is served on `http://localhost:8080` (API proxied at `/api/v1`); the API is also on port 8000 with docs at `/docs`.
-For production, terminate TLS in front of the client container and rotate the JWT secret. `DEFAULT_BUSINESS_ID` unauthenticated access is **development only**.
-
-### Groq AI assistant
-
-Prefer Groq in `server/.env` (never commit real keys):
+Create a `server/.env` file with the following configuration:
 
 ```env
-GROQ_API_KEY=your_groq_key
+# Application
+ENVIRONMENT=development
+PORT=8000
+CORS_ORIGINS=http://localhost:5173,http://localhost:8080
+
+# Database & Authentication
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/
+MONGODB_DATABASE=khataflow
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+
+# AI Agent (Groq / OpenAI)
+GROQ_API_KEY=gsk_your_groq_api_key
 GROQ_MODEL=llama-3.3-70b-versatile
 LLM_BASE_URL=https://api.groq.com/openai/v1
+
+# Voice Transcription (Offline Faster-Whisper)
+WHISPER_MODEL=base
+
+# Shop & Payment Reminders
+UPI_ID=yourshop@upi
+BUSINESS_UPI_NAME=Your Shop Name
+BUSINESS_WHATSAPP=919876543210
 ```
 
-Without a key, the assistant stays rule-based. Tenant overrides in Settings are optional OpenAI-compatible keys (masked when read back).
+---
 
-### UPI and WhatsApp reminders
+## 📡 Core API Endpoints
 
-```env
-UPI_ID=your-business@upi
-BUSINESS_UPI_NAME=Your Business Name
-BUSINESS_WHATSAPP=9198XXXXXXXX
-```
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/health` | Server health check probe |
+| `POST` | `/api/v1/auth/register` | Register new business owner account |
+| `POST` | `/api/v1/auth/login` | Authenticate and return JWT tokens |
+| `POST` | `/api/v1/auth/refresh` | Rotate access token using valid refresh token |
+| `GET` | `/api/v1/inventory/products` | Search & list inventory products |
+| `POST` | `/api/v1/inventory/products` | Create product with pricing & stock levels |
+| `POST` | `/api/v1/transactions` | Record sale, purchase, or return transaction |
+| `GET` | `/api/v1/customers` | List customer credit ledgers & balances |
+| `POST` | `/api/v1/customers/{id}/payments` | Record customer credit payment |
+| `POST` | `/api/v1/customers/{id}/payment-reminder` | Generate WhatsApp prefilled payment link |
+| `POST` | `/api/v1/agent/chat` | Send message/voice to Groq AI bookkeeping agent |
+| `POST` | `/api/v1/voice/transcribe` | Transcribe recorded audio with local Faster-Whisper |
+| `GET` | `/api/v1/reports/daily-close` | Daily closing financial summary & export |
 
-Payment reminders open `wa.me/{customerPhone}` with a prefilled UPI message. Put customer phones as country code + digits (e.g. `9198XXXXXXXX`). Automatic WhatsApp sending via Meta Cloud API is not configured; deep-links work with any staff WhatsApp.
+---
 
-### Auth notes
+## 🌐 Production Deployment (Render)
 
-- Access + refresh JWTs; refresh tokens are rotated and revocable via `POST /api/v1/auth/logout`
-- `GET /api/v1/auth/me` returns the current profile
-- Without SMTP in development, forgot-password / register responses include a copyable `devToken`
+KhataFlow includes pre-configured **`render.yaml`** deployment manifests for [Render.com](https://render.com):
 
-## New shop features
+1. Connect your GitHub repository (`Sivasathya07/KhataFlow`) to Render.
+2. Render will automatically provision two web services:
+   - **`khataflow-api`**: Docker runtime running the FastAPI server.
+   - **`khataflow-web`**: Docker runtime running Nginx + React SPA.
+3. In Render Environment Settings for `khataflow-api`, configure `MONGODB_URI`, `JWT_SECRET`, and `GROQ_API_KEY`.
+4. Deployments trigger automatically on every `git push origin main`.
 
-- **Quick Sale POS** (`#pos`) — barcode/SKU search, cart, GST, cash/UPI/card/credit
-- **Customer payments** — `POST /api/v1/customers/{id}/payments` reduces outstanding balance
-- **Suppliers** — CRUD + receive stock into inventory
-- **Notifications** — in-app center for reminders, payments, stock receives
-- **Daily close** — `GET /api/v1/daily-close` (+ CSV/PDF export)
-- **GST / profit reports** — specialized aggregations (not sales-row clones)
-- **Live dashboard insights** — `GET /api/v1/dashboard/insights`
+---
 
-## Deployment
+## 🛡️ License
 
-For Docker Compose, the included configuration starts an isolated MongoDB instance.
-For MongoDB Atlas, remove the `MONGODB_URI` override in `docker-compose.yml` and
-provide the Atlas URI in `server/.env`. Set a long unique `JWT_SECRET`, production
-`CORS_ORIGINS`, and a locally provisioned `WHISPER_MODEL` before deploying.
-
-`render.yaml` provisions API and web services on Render; add `MONGODB_URI` and the
-final web origin in the Render environment. `railway.json` deploys the API from its
-Dockerfile; provision MongoDB/Atlas and configure the same secrets in Railway.
-The API health probe is `GET /health`, and CI runs Python tests plus frontend lint
-and production build on every push and pull request.
-
-## Configuration
-
-Server configuration is read from environment variables. Copy `server/.env.example` to `server/.env` before running locally. CORS defaults include Vite (`5173`) and Docker web (`8080`).
-
-Mount a local Whisper model directory into the API container if needed; the service does not download models at runtime.
-
-## Data model
-
-The backend foundation includes Pydantic-validated MongoDB document models for users, customers, products, transactions, suppliers, notifications, and AI insights. See [the data-model reference](docs/data-model.md) for relationships and recommended indexes.
-
-## UI foundation
-
-The client uses Tailwind CSS v4, Fraunces + Source Sans 3 branding, and shadcn-style primitives. Theme preference (light/dark/system) is applied from Settings.
-
-## Inventory vertical slice
-
-The Inventory and Products pages use `VITE_API_URL` (see `client/.env.example`; Docker builds bake `/api/v1`). Configure `MONGODB_URI`, `MONGODB_DATABASE`, and the temporary `DEFAULT_BUSINESS_ID` in `server/.env` for local unauthenticated inventory reads in development only.
-
-Inventory endpoints are exposed under `/api/v1/inventory/products`:
-
-- `POST` — create a product
-- `GET` — list/search products
-- `GET /{productId}` — retrieve a product
-- `PATCH /{productId}` — update product configuration with optimistic versioning
-- `DELETE /{productId}` — delete a product (owner/manager)
+Distributed under the **MIT License**. See `LICENSE` for details.
