@@ -34,39 +34,22 @@ _request_windows: dict[str, deque[float]] = defaultdict(deque)
 
 @app.middleware("http")
 async def request_log(request: Request, call_next):
-    """Log request completion without recording credentials or request bodies."""
+    """Log request completion and catch unhandled exceptions gracefully without crashing."""
     try:
-        path = request.url.path
-        is_exempt = request.method == "OPTIONS" or path in ("/", "/health", "/favicon.ico", "/docs", "/openapi.json") or path.startswith("/health")
-        
-        if not is_exempt:
-            forwarded = request.headers.get("x-forwarded-for") or request.headers.get("X-Forwarded-For")
-            real_ip = request.headers.get("x-real-ip") or request.headers.get("cf-connecting-ip")
-            client_ip = (forwarded.split(",")[0].strip() if forwarded else None) or real_ip or (request.client.host if request.client else "unknown")
-
-            now = monotonic()
-            window = _request_windows[client_ip]
-            while window and window[0] <= now - 60:
-                window.popleft()
-            if len(window) >= settings.rate_limit_per_minute:
-                origin = request.headers.get("origin", "*")
-                return JSONResponse(
-                    status_code=429,
-                    content={"detail": "Too many requests. Please retry in a minute."},
-                    headers={
-                        "Retry-After": "60",
-                        "Access-Control-Allow-Origin": origin,
-                        "Access-Control-Allow-Credentials": "true",
-                    },
-                )
-            window.append(now)
-
         response = await call_next(request)
-    except Exception:
+        logging.getLogger(__name__).info("%s %s -> %s", request.method, request.url.path, response.status_code)
+        return response
+    except Exception as exc:
         logging.getLogger(__name__).exception("Unhandled request error: %s %s", request.method, request.url.path)
-        raise
-    logging.getLogger(__name__).info("%s %s -> %s", request.method, request.url.path, response.status_code)
-    return response
+        origin = request.headers.get("origin", "*")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Server error: {str(exc)}"},
+            headers={
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+            },
+        )
 
 
 @app.exception_handler(InventoryError)
