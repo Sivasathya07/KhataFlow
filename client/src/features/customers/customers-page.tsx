@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, extractErrorMessage } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -78,19 +78,14 @@ export function CustomersPage() {
       }>(`/customers/${c.id}/payment-reminder`);
       const { autoSent, autoSentError, whatsappLink, customer } = res.data.data;
       if (autoSent) {
-        // Show success toast-like alert
         alert(`✅ WhatsApp message sent automatically to ${customer}!`);
       } else if (whatsappLink) {
-        // Fallback: open WhatsApp manually
-        const msg = autoSentError ? `Auto-send unavailable (${autoSentError}).\nOpening WhatsApp manually…` : "Opening WhatsApp…";
-        alert(msg);
         window.open(whatsappLink, "_blank", "noopener,noreferrer");
       } else {
-        alert(autoSentError ?? "This customer has no phone number.");
+        alert(autoSentError ?? "This customer has no phone number. Add one before sending a WhatsApp reminder.");
       }
     } catch (err: unknown) {
-      const d = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      alert(typeof d === "string" ? d : "Could not send reminder.");
+      alert(extractErrorMessage(err, "Could not send reminder."));
     }
   };
 
