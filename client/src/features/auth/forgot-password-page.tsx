@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "@/lib/api";
+import { api, extractErrorMessage } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -31,8 +31,7 @@ export function ForgotPasswordPage({
         setDevToken(res.data.data.devToken);
       }
     } catch (err: unknown) {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(detail ?? "Could not start password reset.");
+      setError(extractErrorMessage(err, "Could not start password reset."));
     } finally {
       setSubmitting(false);
     }

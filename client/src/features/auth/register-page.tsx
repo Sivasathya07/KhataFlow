@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Building, Mail, User } from "lucide-react";
+import { extractErrorMessage } from "@/lib/api";
 
 export function RegisterPage({
   onNavigateToLogin,
@@ -29,8 +30,7 @@ export function RegisterPage({
       const result = await register(businessName, displayName, email, password);
       onRegistered?.(result.devToken);
     } catch (err: unknown) {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(detail ?? "Registration failed. Try a different email.");
+      setError(extractErrorMessage(err, "Registration failed. Try a different email."));
     } finally {
       setSubmitting(false);
     }

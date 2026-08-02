@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Lock, Mail } from "lucide-react";
+import { extractErrorMessage } from "@/lib/api";
 
 export function LoginPage({
   onNavigateToRegister,
@@ -28,8 +29,7 @@ export function LoginPage({
     try {
       await login(email, password);
     } catch (err: unknown) {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(detail ?? "Invalid credentials. Please try again.");
+      setError(extractErrorMessage(err, "Invalid credentials. Please try again."));
     } finally {
       setSubmitting(false);
     }

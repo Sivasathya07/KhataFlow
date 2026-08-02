@@ -36,14 +36,31 @@ _request_windows: dict[str, deque[float]] = defaultdict(deque)
 async def request_log(request: Request, call_next):
     """Log request completion without recording credentials or request bodies."""
     try:
-        key = request.headers.get("X-Forwarded-For", request.client.host if request.client else "unknown").split(",")[0].strip()
-        now = monotonic()
-        window = _request_windows[key]
-        while window and window[0] <= now - 60:
-            window.popleft()
-        if len(window) >= settings.rate_limit_per_minute:
-            return JSONResponse(status_code=429, content={"detail": "Too many requests. Please retry shortly."}, headers={"Retry-After": "60"})
-        window.append(now)
+        path = request.url.path
+        is_exempt = request.method == "OPTIONS" or path in ("/", "/health", "/favicon.ico", "/docs", "/openapi.json") or path.startswith("/health")
+        
+        if not is_exempt:
+            forwarded = request.headers.get("x-forwarded-for") or request.headers.get("X-Forwarded-For")
+            real_ip = request.headers.get("x-real-ip") or request.headers.get("cf-connecting-ip")
+            client_ip = (forwarded.split(",")[0].strip() if forwarded else None) or real_ip or (request.client.host if request.client else "unknown")
+
+            now = monotonic()
+            window = _request_windows[client_ip]
+            while window and window[0] <= now - 60:
+                window.popleft()
+            if len(window) >= settings.rate_limit_per_minute:
+                origin = request.headers.get("origin", "*")
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Too many requests. Please retry in a minute."},
+                    headers={
+                        "Retry-After": "60",
+                        "Access-Control-Allow-Origin": origin,
+                        "Access-Control-Allow-Credentials": "true",
+                    },
+                )
+            window.append(now)
+
         response = await call_next(request)
     except Exception:
         logging.getLogger(__name__).exception("Unhandled request error: %s %s", request.method, request.url.path)

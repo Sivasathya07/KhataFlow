@@ -57,3 +57,24 @@ api.interceptors.response.use(
     return api(original);
   },
 );
+
+export function extractErrorMessage(err: unknown, fallback: string): string {
+  if (axios.isAxiosError(err)) {
+    if (err.response?.status === 429) {
+      return "Too many requests. Please wait a minute and try again.";
+    }
+    const data = err.response?.data as { detail?: string | Array<{ msg?: string }>; error?: { message?: string } } | undefined;
+    if (data?.detail) {
+      if (typeof data.detail === "string") return data.detail;
+      if (Array.isArray(data.detail)) {
+        const msgs = data.detail.map((item) => item.msg).filter(Boolean);
+        if (msgs.length > 0) return msgs.join(", ");
+      }
+    }
+    if (data?.error?.message) return data.error.message;
+    if (err.message && !err.message.startsWith("Request failed with status code")) return err.message;
+  }
+  if (err instanceof Error) return err.message;
+  return fallback;
+}
+

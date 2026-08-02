@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:5173,http://localhost:8080"
     password_reset_minutes: int = 30
     verification_token_days: int = 2
-    rate_limit_per_minute: int = 120
+    rate_limit_per_minute: int = 300
     public_web_url: str = "http://localhost:5173"
     upi_id: str | None = None
     business_upi_name: str = "KhataFlow Business"
