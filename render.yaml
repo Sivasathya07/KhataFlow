@@ -25,6 +25,9 @@ services:
     runtime: docker
     dockerContext: ./client
     dockerfilePath: ./client/Dockerfile
+    dockerBuildArgs:
+      - key: API_URL
+        value: https://khataflow-api.onrender.com
     envVars:
       - key: API_URL
-        sync: false
+        value: https://khataflow-api.onrender.com
