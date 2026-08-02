@@ -36,7 +36,7 @@ _request_windows: dict[str, deque[float]] = defaultdict(deque)
 async def request_log(request: Request, call_next):
     """Log request completion without recording credentials or request bodies."""
     try:
-        key = request.client.host if request.client else "unknown"
+        key = request.headers.get("X-Forwarded-For", request.client.host if request.client else "unknown").split(",")[0].strip()
         now = monotonic()
         window = _request_windows[key]
         while window and window[0] <= now - 60:
